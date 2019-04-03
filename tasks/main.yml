@@ -1,0 +1,43 @@
+---
+
+- name: Add users | create users, shell, home dirs
+  user:
+    name: "{{ item.username }}"
+    shell: /bin/bash
+    createhome: yes
+    comment: "{{ users_comment }}"
+  loop: "{{ users }}"
+  loop_control:
+    label: "{{ item.username }}"
+
+- name: Setup | authorized key upload
+  authorized_key:
+    user: "{{ item.username }}"
+    key: "{{ item.public_keys | default([]) | join('\n') }}"
+  loop: "{{ users }}"
+  loop_control:
+    label: "{{ item.username }}"
+
+- name: Sudoers | update sudoers file and validate
+  lineinfile:
+    dest: /etc/sudoers
+    insertafter: EOF
+    line: "{{ item.username }} ALL=(ALL) NOPASSWD: ALL"
+    regexp: '^{{ item.username }} .*'
+    state: present
+  when: item.use_sudo == true
+  loop: "{{ users }}"
+  loop_control:
+    label: "{{ item.username }}"
+
+- name: Remove users, that are not in sudo
+  lineinfile:
+    dest: /etc/sudoers
+    insertafter: EOF
+    line: '{{ item.username }} ALL=(ALL) NOPASSWD: ALL'
+    regexp: '^{{ item.username }} .*'
+    state: absent
+  when: item.use_sudo == false
+  loop: "{{ users }}"
+  loop_control:
+    label: "{{ item.username }}"

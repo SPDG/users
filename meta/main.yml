@@ -1,0 +1,17 @@
+galaxy_info:
+  author: Tomasz Skręt
+  description: Create users in Ubuntu system
+  company: SPDG
+
+  license: MIT
+
+  min_ansible_version: 2.6
+
+  galaxy_tags:
+    - ubuntu
+    - sudo
+    - user
+    - users
+    - groups
+
+dependencies: []
